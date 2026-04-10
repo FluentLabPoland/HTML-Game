@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Quiz Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
+        url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f');
+      background-size: cover;
+      background-position: center;
+    }
+
+    h1 { margin-top: 20px; }
+
+    .quiz-box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      width: 300px;
+      margin: 30px auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .question {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .option {
+      display: block;
+      background: #3498db;
+      color: white;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .option.correct { background: #2ecc71; }
+    .option.wrong { background: #e74c3c; }
+
+    button {
+      margin-top: 15px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #e67e22;
+      color: white;
+      cursor: pointer;
+    }
+
+    .shake {
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    .home-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>English Quiz Game</h1>
+<p>Choose the correct meaning!</p>
+
+<div class="quiz-box" id="quizBox"></div>
+
+<script>
+  const wordBank = [
+    { word: "Apple", correct: "A fruit", wrong: ["An animal", "A car"] },
+    { word: "Dog", correct: "An animal", wrong: ["A fruit", "A color"] },
+    { word: "Blue", correct: "A color", wrong: ["An animal", "A drink"] },
+    { word: "Chair", correct: "You sit on it", wrong: ["You eat it", "You wear it"] },
+    { word: "Water", correct: "You drink it", wrong: ["You drive it", "You read it"] }
+  ];
+
+  let current = 0;
+  let questions = [];
+  let selected = false;
+  let score = 0;
+
+  function showHome() {
+    const box = document.getElementById("quizBox");
+    box.innerHTML = "";
+
+    const title = document.createElement("div");
+    title.className = "home-title";
+    title.innerText = "Welcome 👋";
+
+    const btn = document.createElement("button");
+    btn.innerText = "Start Game";
+    btn.onclick = startGame;
+
+    box.appendChild(title);
+    box.appendChild(btn);
+  }
+
+  function startGame() {
+    score = 0;
+    questions = wordBank.slice().sort(function() { return 0.5 - Math.random(); }).slice(0, 5);
+    current = 0;
+
+    renderGame();
+    showQuestion();
+  }
+
+  function renderGame() {
+    const box = document.getElementById("quizBox");
+    box.innerHTML = "<div id='score'>Score: 0</div>" +
+      "<div class='question' id='question'></div>" +
+      "<div id='options'></div>" +
+      "<button onclick='nextQuestion()'>Next</button>";
+  }
+
+  function showQuestion() {
+    if (!questions[current]) return;
+    selected = false;
+    selected = false;
+    const q = questions[current];
+    document.getElementById("question").innerText = q.word;
+
+    const options = [q.correct].concat(q.wrong).sort(function() { return 0.5 - Math.random(); });
+    const container = document.getElementById("options");
+    container.innerHTML = "";
+
+    options.forEach(function(opt) {
+      const div = document.createElement("div");
+      div.classList.add("option");
+      div.innerText = opt;
+
+      div.onclick = function() {
+        if (selected) return;
+
+        selected = true;
+
+        if (opt === q.correct) {
+          score++;
+          div.classList.add("correct");
+        } else {
+          div.classList.add("wrong");
+        }
+
+        document.getElementById("score").innerText = "Score: " + score;
+      };
+
+      container.appendChild(div);
+    });
+  }
+
+  function nextQuestion() {
+    if (!selected) {
+      const box = document.querySelector(".quiz-box");
+      box.classList.add("shake");
+      setTimeout(function() { box.classList.remove("shake"); }, 400);
+      return;
+    }
+
+    current++;
+
+    if (current >= 5) {
+      endGame();
+    } else {
+      showQuestion();
+    }
+  }
+
+  function endGame() {
+    const box = document.getElementById("quizBox");
+    box.innerHTML = "<h2>🎉 Game Over</h2>" +
+      "<p>Your score: " + score + "/5</p>";
+
+    const btn = document.createElement("button");
+    btn.innerText = "Start New Game";
+    btn.onclick = showHome;
+    box.appendChild(btn);
+  }
+
+  window.nextQuestion = nextQuestion;
+  window.startGame = startGame;
+
+  document.addEventListener("DOMContentLoaded", function() {
+    showHome();
+  });
+</script>
+
+</body>
+</html>
